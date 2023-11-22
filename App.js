@@ -8,7 +8,9 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
+  Modal,
 } from "react-native";
 
 const DATA = [
@@ -29,17 +31,12 @@ const DATA = [
   },
 ];
 
-const TodoItem = (props) => {
-  return (
-    <View style={styles.item}>
-      <Text style={styles.itemText}>{props.item.title}</Text>
-    </View>
-  );
-};
+
 
 export default function App() {
   const [items, setItems] = useState(DATA);
   const [text, setText] = useState("");
+  const [isModalVisible, setIsModalVisible]=useState(false)
 
   const addNewTodo = () => {
     let newTodo = {
@@ -54,12 +51,40 @@ export default function App() {
     }
   }
 
+  const markedItemCompleted = (item) => {
+    const itemIndex = items.findIndex((currItem) => currItem.id == item.id);
+
+    if (itemIndex !== -1) {
+      const updatedItems = [...items];
+      updatedItems[itemIndex] = { ...items[itemIndex], completed: true };
+
+      setItems(updatedItems);
+    }
+  };
+
+  const TodoItem = (props) => {
+    return (
+      <TouchableOpacity
+        style={styles.item}
+        onPress={() => markedItemCompleted(props.item)}
+      >
+        <Text style={props.item.completed ? styles.itemTextCompleyted : styles.itemText}>{props.item.title}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text>Hello Maya</Text>
+      <Button title="Add Item" onPress={()=>setIsModalVisible(true)}/>
+      <Modal visible={isModalVisible} transparent={true} onRequestClose={()=>{setIsModalVisible(!isModalVisible)}}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TextInput style={styles.input} onChangeText={setText} value={text} />
+            <Button title="Add Todo" onPress={addNewTodo} />
+          </View>
+        </View>
+      </Modal>
       <StatusBar style="auto" />
-      <TextInput style={styles.input} onChangeText={setText} value={text} />
-      <Button title="Add Todo" onPress={addNewTodo} />
       <FlatList
         style={styles.list}
         data={items}
@@ -98,4 +123,22 @@ const styles = StyleSheet.create({
   itemText: {
     color: "white",
   },
+    itemTextCompleyted:{
+    color:'white',
+    textDecorationLine: 'line-through'
+    },
+    centeredView:{
+      margin:20,
+      backgroundColor: 'white',
+      borderRadius:20,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width:0,
+        height:2,
+      },
+      shadowOpacity:0.25,
+      shadowRadius:4,
+      elevation:5
+    }
 });
