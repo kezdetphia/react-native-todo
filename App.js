@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { StatusBar } from "expo-status-bar";
+import { Ionicons } from '@expo/vector-icons'
+import {styles} from './App.style'
+
 import {
   Alert,
   Button,
@@ -18,16 +21,19 @@ const DATA = [
     id: 1,
     title: "Meditation",
     completed: false,
+    color: '#6DB6DD'
   },
   {
     id: 2,
     title: "Coding",
     completed: false,
+    color: '#EBC58C'
   },
   {
     id: 3,
     title: "Workout",
     completed: false,
+    color: '#BC96E6'
   },
 ];
 
@@ -43,11 +49,13 @@ export default function App() {
       id: items.length +1,
       title: text,
       completed: false,
+      color: '#DF5E5E'
     };
     if (!text) Alert.alert('Add Todo')
     else{
       setItems([...items, newTodo]);
       setText('')
+      setIsModalVisible(false)
     }
   }
 
@@ -65,21 +73,40 @@ export default function App() {
   const TodoItem = (props) => {
     return (
       <TouchableOpacity
-        style={styles.item}
+        style={[styles.item, {backgroundColor:props.item.color}]}
         onPress={() => markedItemCompleted(props.item)}
       >
-        <Text style={props.item.completed ? styles.itemTextCompleyted : styles.itemText}>{props.item.title}</Text>
+        <Text style={props.item.completed ? styles.itemTextCompleted : styles.itemText}>{props.item.title}</Text>
       </TouchableOpacity>
     );
   };
 
+  const renderAddButton=()=>{
+    return (
+      <TouchableOpacity onPress={() => setIsModalVisible(true)}>
+        <View style={styles.icon}>
+          <Ionicons name="add" size={24} color="#652E00" />
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <Button title="Add Item" onPress={()=>setIsModalVisible(true)}/>
-      <Modal visible={isModalVisible} transparent={true} onRequestClose={()=>{setIsModalVisible(!isModalVisible)}}>
+    <Modal
+        visible={isModalVisible}
+        transparent={true}
+        onRequestClose={() => {
+          setIsModalVisible(!isModalVisible);
+        }}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <TextInput style={styles.input} onChangeText={setText} value={text} />
+            <TextInput
+              style={styles.input}
+              onChangeText={setText}
+              value={text}
+            />
             <Button title="Add Todo" onPress={addNewTodo} />
           </View>
         </View>
@@ -90,55 +117,8 @@ export default function App() {
         data={items}
         renderItem={({ item }) => <TodoItem item={item} />}
         keyExtractor={(item) => item.id}
+        ListFooterComponent={renderAddButton}
       />
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  input: {
-    borderColor: "gray",
-    borderWidth: 1,
-    width: 200,
-    height: 40,
-    borderRadius: 10,
-    padding: 10,
-  },
-  list: {
-    alignSelf: "stretch",
-  },
-  item: {
-    backgroundColor: "#6DB6DD",
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 16,
-    borderRadius: 10,
-  },
-  itemText: {
-    color: "white",
-  },
-    itemTextCompleyted:{
-    color:'white',
-    textDecorationLine: 'line-through'
-    },
-    centeredView:{
-      margin:20,
-      backgroundColor: 'white',
-      borderRadius:20,
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: {
-        width:0,
-        height:2,
-      },
-      shadowOpacity:0.25,
-      shadowRadius:4,
-      elevation:5
-    }
-});
